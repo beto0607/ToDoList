@@ -49,3 +49,5 @@ gem 'pg'
 gem "factory_bot_rails", "~> 5.0"
 gem "jsonapi-serializers", "~> 1.0"
 gem 'jwt'
+
+#gem 'webpacker', '~> 4.x'
