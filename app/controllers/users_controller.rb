@@ -40,15 +40,14 @@ class UsersController < ApplicationController
   private
 
   def find_user
-    @user = User.find_by_username!(params[:_username])
+    @user = User.find_by_id!(params[:id])
   rescue ActiveRecord::RecordNotFound
     render json: { errors: "User not found" }, status: :not_found
   end
 
   def user_params
-    params.permit(
-    #   :avatar, 
-      :name, :username, :email, :password, :password_confirmation
+    params.require(:user).permit(
+        :name, :username, :email, :password, :password_confirmation
     )
   end
 end
