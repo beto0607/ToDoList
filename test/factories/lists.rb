@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :list do
-    title { "New Rails project" }
+    sequence(:title) {|n| "New Rails project ##{n}"}
     description { "New project based in Rails" }
     due_date { "2019-06-30 23:17:00" }
     user
