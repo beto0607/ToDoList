@@ -8,11 +8,17 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         get list_comments_url(@list.id), headers: @auth_header
         assert_response :ok
     end
-    test "Index - User must be the owner of the list" do
+    test "Index - User should be the owner of the list" do
         createUserAndLogin
         createList
         createOtherUserAndLogin
         get list_comments_url(@list.id), headers:@other_user_auth_header
+        assert_response :unauthorized
+    end
+    test "Index - User should be logged in" do
+        @user = create(:user)
+        createList
+        get list_comments_url(@list.id)
         assert_response :unauthorized
     end
     test "Index - list not found" do
@@ -35,14 +41,14 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         post list_comments_url(-1), params:{comment: @params}, headers: @auth_header
         assert_response :not_found
     end
-    test "Create - User not logged in" do
+    test "Create - User should be logged in" do
         @user = create(:user)
         createList
         @params = attributes_for(:comment)
         post list_comments_url(@list.id), params:{comment: @params}
         assert_response :unauthorized
     end
-    test "Create - User must be the owner of the list" do
+    test "Create - User should be the owner of the list" do
         createUserAndLogin
         createList
         createOtherUserAndLogin
@@ -50,7 +56,7 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         post list_comments_url(@list.id), params:{comment: @params}, headers:@other_user_auth_header
         assert_response :unauthorized
     end
-    test "Create - Comment must have a description" do
+    test "Create - Comment should have a description" do
         createUserAndLogin
         createList
         @params = attributes_for(:comment, description: nil)
@@ -76,14 +82,14 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         put comment_url(@comment), params:{comment:{description: "new description"}}
         assert_response :unauthorized
     end
-    test "Update - User must be the owner of the list" do
+    test "Update - User should be the owner of the list" do
         createUserAndLogin
         createComment
         createOtherUserAndLogin
         put comment_url(@comment), params:{comment:{description: "new description"}}, headers: @other_user_auth_header
         assert_response :unauthorized
     end
-    test "Update - Comment must have a description" do
+    test "Update - Comment should have a description" do
         createUserAndLogin
         createComment
         put comment_url(@comment), params:{comment:{description:nil}}, headers: @auth_header
@@ -108,7 +114,7 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         delete comment_url(@comment)
         assert_response :unauthorized
     end
-    test "Delete - User must be the owner of the list" do
+    test "Delete - User should be the owner of the list" do
         createUserAndLogin
         createOtherUserAndLogin
         createComment
