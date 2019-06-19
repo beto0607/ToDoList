@@ -1,7 +1,7 @@
 class UsersController < ApplicationController
   before_action :authorize_request, except: :create
   before_action :find_user, except: %i[create index]
-
+  before_action :logged_id?, only: [:update, :destroy]
   # GET /users
   def index
     @users = User.all
@@ -47,7 +47,15 @@ class UsersController < ApplicationController
 
   def user_params
     params.require(:user).permit(
-        :name, :username, :email, :password, :password_confirmation
+      :name, :username, :email, :password, :password_confirmation
     )
+  end
+
+  def logged_id?
+    if (@user == @current_user)
+      true
+    else
+      render json: { errors: "Token and ID are from differents users" }, status: :unauthorized
+    end
   end
 end
