@@ -8,60 +8,91 @@ require "test_helper"
 
 class ListsControllerTest < ActionDispatch::IntegrationTest
   #Index
-  test "Index - ok" do
-    get lists_url
+  test "Index - With user's id" do
+    createUserAndLogin
+    get user_lists_url(@user.id), 
+        headers: @auth_header
     assert_response :ok
   end
-  test "Index - for an user" do
+  test "Index - User should be logged in" do
     @user = create(:user)
-    get "/users/#{@user.id}/lists"
-    assert_response :ok
+    get user_lists_url(@user.id)
+    assert_response :unauthorized
   end
-  test "Index - for an user - user not found" do
-    get user_lists_url(-1)
+  test "Index - User not found" do
+    createUserAndLogin
+    get user_lists_url(-1), 
+        headers: @auth_header
     assert_response :not_found
-  end
-  #End index
-  #Show
-  test "Show - ok" do
+end
+#End index
+#Show
+test "Show - Ok" do
+    createUserAndLogin
     createList
-    get list_url(@list)
+    get list_url(@list), 
+        headers: @auth_header
     assert_response :ok
   end
   test "Show - not found" do
-    get list_url(-1)
+    createUserAndLogin
+    get list_url(-1), 
+        headers: @auth_header
     assert_response :not_found
+  end
+  test "Show - User should be logged in" do
+    @user = create(:user)
+    createList
+    get list_url(@list)
+    assert_response :unauthorized
   end
   #End show
   #Create
-  test "Create - created" do
+  test "Create - Created" do
     createUserAndLogin
     createList
-    post user_lists_url(@user), params: { list: attributes_for(:list) }, headers: @auth_header
+    post user_lists_url(@user.id),
+         params: { list: attributes_for(:list) },
+         headers: @auth_header
     assert_response :created
   end
-  test "Create - It should be authenticated" do
+  test "Create - User should be logged in" do
     @user = create(:user)
-    post user_lists_url(@user), params: { list: attributes_for(:list) }
+    post user_lists_url(@user.id),
+         params: { list: attributes_for(:list) }
     assert_response :unauthorized
   end
-  test "Create - It should has a title" do
+  test "Create - List should have a title" do
     createUserAndLogin
-    post user_lists_url(@user), params: { list: attributes_for(:list, title: nil) }, headers: @auth_header
+    post user_lists_url(@user.id),
+         params: { list: attributes_for(:list, title: nil) },
+         headers: @auth_header
     assert_response :unprocessable_entity
+  end
+  test "Create - User's ID and token should match" do
+    @user = create(:user)
+    createOtherUserAndLogin
+    post user_lists_url(@user.id),
+         params: { list: attributes_for(:list) },
+         headers: @other_user_auth_header
+    assert_response :unauthorized
   end
   #End create
   #Update
-  test "Update - ok" do
+  test "Update - No content" do
     createUserAndLogin
     createList
-    put list_url(@list), params: { list: { title: "new title" } }, headers: @auth_header
+    put list_url(@list), 
+        params: { list: { title: "new title" } }, 
+        headers: @auth_header
     assert_response :ok
   end
-  test "Update - It should has a title" do
+  test "Update - List should have a title" do
     createUserAndLogin
     createList
-    put list_url(@list), params: { list: { title: nil } }, headers: @auth_header
+    put list_url(@list), 
+        params: { list: { title: nil } }, 
+        headers: @auth_header
     assert_response :unprocessable_entity
   end
   test "Update - User should be logged in" do

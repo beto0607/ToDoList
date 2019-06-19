@@ -1,17 +1,16 @@
 class ListsController < ApplicationController
+  before_action :authorize_request
   before_action :set_list, only: [:show, :update, :destroy]
-  before_action :authorize_request, only: [:create, :update, :destroy]
   before_action :find_user, only: [:create]
-  before_action :check_if_owner, only: [:update, :destroy]
-  # GET /lists or GET /user/:user_id/lists
+  before_action :check_if_owner, only: [:show, :update, :destroy]
+  before_action :check_user_id_and_current_user, only: [:create]
+  # GET /user/:user_id/lists
   def index
     if (params[:user_id])
       find_user
       if (@user)
         render json: @user.lists
       end
-    else
-      render json: List.all
     end
   end
 
@@ -66,10 +65,17 @@ class ListsController < ApplicationController
   end
 
   def check_if_owner
-    if(@list.owner?(@current_user))then
+    if (@list.owner?(@current_user))
+      true
+    else
+      render json: { errors: "User is not the owner" }, status: :unauthorized
+    end
+  end
+  def check_user_id_and_current_user
+    if (@current_user.id == @user.id)
         true
     else
-        render json: { errors: "User is not the owner" }, status: :unauthorized
+        render json: { errors: "User's ID and token are different" }, status: :unauthorized
     end
   end
 end
