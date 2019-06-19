@@ -3,12 +3,21 @@ require 'test_helper'
 class CommentsControllerTest < ActionDispatch::IntegrationTest
     #Index
     test "Index - ok" do
-        @comment = create(:comment)
-        get list_comments_url(@comment.list_id)
+        createUserAndLogin
+        createList
+        get list_comments_url(@list.id), headers: @auth_header
         assert_response :ok
     end
+    test "Index - User must be the owner of the list" do
+        createUserAndLogin
+        createList
+        createOtherUserAndLogin
+        get list_comments_url(@list.id), headers:@other_user_auth_header
+        assert_response :unauthorized
+    end
     test "Index - list not found" do
-        get list_comments_url(-1)
+        createUserAndLogin
+        get list_comments_url(-1), headers: @auth_header
         assert_response :not_found
     end
     #End index

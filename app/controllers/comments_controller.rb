@@ -1,8 +1,8 @@
 class CommentsController < ApplicationController
-  before_action :authorize_request, except: [:index]
+  before_action :authorize_request
   before_action :set_list, only: [:index, :create]
   before_action :set_comment, only: [:show, :update, :destroy]
-  before_action :check_if_owner, only: [:create, :update, :destroy]
+  before_action :check_if_owner, only: [:index,:create, :update, :destroy]
 
   # GET /lists/1/comments
   def index
