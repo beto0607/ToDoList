@@ -6,5 +6,4 @@ Rails.application.routes.draw do
     end
   end
   post "/auth/login", to: "authentication#login"
-  resources :lists, only:[:index]
 end
