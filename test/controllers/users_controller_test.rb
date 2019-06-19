@@ -117,6 +117,13 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
         delete user_url(@user)
         assert_response :unauthorized
     end
+    test "User delete - should destroy lists" do
+        @user = create(:user)
+        @list = create(:list, user: @user)
+        delete user_url(@user), headers: getUserTokenHeader
+        assert_response :no_content
+        assert_equal @user.lists.count, 0
+    end
     #End user deletion
     private 
     def getUserTokenHeader

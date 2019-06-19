@@ -8,7 +8,7 @@ class User < ApplicationRecord
             length: { minimum: 6 },
             if: -> { new_record? || !password.nil? }
 
-  has_many :lists
+  has_many :lists, dependent: :destroy
   has_many :items
-  has_many :comments
+  has_many :comments, dependent: :destroy
 end

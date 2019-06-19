@@ -66,10 +66,10 @@ class ListsController < ApplicationController
   end
 
   def check_if_owner
-    if(@current_user != @list.user)then
-        render json: { errors: "User is not the owner" }, status: :unauthorized
-    else
+    if(@list.owner?(@current_user))then
         true
+    else
+        render json: { errors: "User is not the owner" }, status: :unauthorized
     end
   end
 end

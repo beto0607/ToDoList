@@ -92,6 +92,14 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
         delete list_url(@list), headers: @other_user_auth_header
         assert_response :unauthorized
     end
+    test "Delete list - remove items" do
+        createUserAndLogin
+        createList
+        createItem
+        delete list_url(@list), headers: @auth_header
+        assert_response :no_content
+        assert_equal @list.items.count, 0
+    end
     #End lists delete
 
     private
@@ -106,5 +114,8 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     def createList
         @user ||= create(:user)
         @list = create(:list, user:@user)
+    end
+    def createItem
+        @item = create(:item, list:@list)
     end
 end
