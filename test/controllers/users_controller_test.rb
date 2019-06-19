@@ -79,12 +79,12 @@ class UsersControllerTest < ActionDispatch::IntegrationTest
     test "Update - No content" do
         createUserAndLogin
         put user_url(@user), params:{user: {name: 'new name'}}, headers: @auth_header
-        assert_response :no_content
+        assert_response :ok
     end
     test "Update - Password" do
         createUserAndLogin
         put user_url(@user), params:{user: {password: 'new_password'}}, headers: @auth_header
-        assert_response :no_content
+        assert_response :ok
     end
     test "Update - Password and password_confirmation are different" do
         createUserAndLogin

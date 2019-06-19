@@ -69,7 +69,7 @@ class CommentsControllerTest < ActionDispatch::IntegrationTest
         createUserAndLogin
         createComment
         put comment_url(@comment), params:{comment:{description: "new description"}}, headers: @auth_header
-        assert_response :no_content
+        assert_response :ok
     end
     test "Update - Comment not found" do
         createUserAndLogin

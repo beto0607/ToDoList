@@ -1,24 +1,20 @@
 class ItemsController < ApplicationController
-  before_action :set_item, only: [:show, :update, :destroy]
+  before_action :authorize_request
+  before_action :set_item, only: [:update, :destroy, :resolve, :unsolve]
+  before_action :set_list, only: [:index, :create]
+  before_action :check_list_owner
 
-  # GET /items
+  # GET /lists/1/items
   def index
-    @items = Item.all
-
-    render json: @items
+    render json: @list.items
   end
 
-  # GET /items/1
-  def show
-    render json: @item
-  end
-
-  # POST /items
+  # POST /lists/1/items
   def create
     @item = Item.new(item_params)
-
+    @item.list_id = @list.id
     if @item.save
-      render json: @item, status: :created, location: @item
+      render json: @item, status: :created
     else
       render json: @item.errors, status: :unprocessable_entity
     end
@@ -38,14 +34,47 @@ class ItemsController < ApplicationController
     @item.destroy
   end
 
-  private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_item
-      @item = Item.find(params[:id])
+  # PATCH/PUT /items/1/resolve
+  def resolve
+    if @item.update(status: "DONE")
+      render json: {item: @item}
+    else
+      render json: @item.errors, status: :unprocessable_entity
     end
+  end
 
-    # Only allow a trusted parameter "white list" through.
-    def item_params
-      params.require(:item).permit(:title, :description, :status, :due_date, :list_id)
+  # PATCH/PUT /items/1/resolve
+  def unsolve
+    if @item.update(status: "ACTIVE") then
+        render json: {item: @item}, status: :ok
+    else
+      render json: @item.errors, status: :unprocessable_entity
     end
+  end
+
+  private
+
+  # Use callbacks to share common setup or constraints between actions.
+  def set_item
+    @item = Item.find(params[:id] || params[:item_id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { errors: "Item not found" }, status: :not_found
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def item_params
+    params.require(:item).permit(:title, :description, :status, :due_date, :list_id)
+  end
+
+  def set_list
+    @list = List.find(params[:list_id])
+  rescue ActiveRecord::RecordNotFound
+    render json: { errors: "List not found" }, status: :not_found
+  end
+
+  def check_list_owner
+    if (!((@list && @list.owner?(@current_user)) || (@item && @item.list.owner?(@current_user))))then
+      render json: { errors: "User must be the list's owner" }, status: :unauthorized
+    end
+  end
 end
