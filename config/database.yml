@@ -6,22 +6,22 @@
 #
 default: &default
   adapter: postgresql
-  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  pool: <%= ENV.fetch('RAILS_MAX_THREADS') { 5 } %>
   timeout: 5000
-  username: rails_user
-  password: pQ%4AMFf8yj7
+  password: <%= ENV['DB_PASSWORD'] %>
+  username: <%= ENV['DB_USERNAME'] %>
 
 development:
   <<: *default
-  database: todo_lists_dev
+  database: <%= ENV['DB_DEV_NAME'] %>
 
-# Warning: The database defined as "test" will be erased and
-# re-generated from your development database when you run "rake".
+# Warning: The database defined as 'test' will be erased and
+# re-generated from your development database when you run 'rake'.
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: todo_lists_test
+  database: <%= ENV['DB_TEST_NAME'] %>
 
 production:
   <<: *default
-  database: todo_lists
+  database: <%= ENV['DB_PROD_NAME'] %>
