@@ -1,26 +1,24 @@
+class Authentication
+  attr_accessor :user, :token, :exp, :id
+end
+
 class AuthenticationController < ApplicationController
-  before_action :authorize_request, except: :login
 
   # POST /auth/login
+  # @parms {auth:{:email,:password}}
   def login
     @user = User.find_by_email(params[:auth][:email])
     if @user&.authenticate(params[:auth][:password])
-      token = JsonWebToken.encode(user_id: @user.id)
-      time = Time.now + 24.hours.to_i
-      render json: {
-               token: token,
-               exp: time.strftime("%m-%d-%Y %H:%M"),
-               username: @user.username,
-               user_id: @user.id,
-             }, status: :ok
+      obj = Authentication.new
+      obj.token = JsonWebToken.encode(user_id: @user.id)
+      obj.user = @user
+      obj.exp = (Time.now + 24.hours.to_i).strftime("%m-%d-%Y %H:%M")
+      render json: serialize_model(obj, include: ["user"]),
+             status: :ok
     else
-      render json: { error: "unauthorized" }, status: :unauthorized
+      errors = [{ "title": "Unauthorized", "detail": "Email or password invalid." }]
+      render json: JSONAPI::Serializer.serialize_errors(errors),
+             status: :unauthorized
     end
-  end
-
-  private
-
-  def login_params
-    params.require(:auth).permit(:email, :password)
   end
 end
