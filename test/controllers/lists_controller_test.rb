@@ -14,6 +14,14 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
         headers: @auth_header
     assert_response :ok
   end
+  test "Index - With items" do
+    createUserAndLogin
+    createList
+    createItem
+    get user_lists_url(@user.id), 
+        headers: @auth_header
+    assert_response :ok
+  end
   test "Index - User should be logged in" do
     @user = create(:user)
     get user_lists_url(@user.id)
@@ -30,6 +38,14 @@ end
 test "Show - Ok" do
     createUserAndLogin
     createList
+    get list_url(@list), 
+        headers: @auth_header
+    assert_response :ok
+  end
+  test "Show - With items" do
+    createUserAndLogin
+    createList
+    createItem
     get list_url(@list), 
         headers: @auth_header
     assert_response :ok
