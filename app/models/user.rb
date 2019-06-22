@@ -9,6 +9,5 @@ class User < ApplicationRecord
             if: -> { new_record? || !password.nil? }
 
   has_many :lists, dependent: :destroy
-  has_many :items
   has_many :comments, dependent: :destroy
 end
