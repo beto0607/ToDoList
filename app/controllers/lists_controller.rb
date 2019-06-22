@@ -9,14 +9,16 @@ class ListsController < ApplicationController
     if (params[:user_id])
       find_user
       if (@user)
-        render json: @user.lists
+        render json: serialize_models(@user.lists),
+               status: :ok
       end
     end
   end
 
   # GET /lists/1
   def show
-    render json: @list
+    render json: serialize_model(@list, include: ["items", "comments"]),
+           status: :ok
   end
 
   # POST /users/:user_id/lists
@@ -24,18 +26,20 @@ class ListsController < ApplicationController
     @list = List.new(list_params)
     @list.user = @user
     if @list.save
-      render json: @list, status: :created
+      render json: serialize_model(@list),
+             status: :created
     else
-      render json: @list.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @list.errors)
     end
   end
 
   # PATCH/PUT /lists/1
   def update
     if @list.update(list_params)
-      render json: @list, status: :ok
+      render json: serialize_model(@list),
+             status: :ok
     else
-      render json: @list.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @list.errors)
     end
   end
 
@@ -50,7 +54,7 @@ class ListsController < ApplicationController
   def set_list
     @list = List.find(params[:id])
   rescue ActiveRecord::RecordNotFound
-    render json: { errors: "List not found" }, status: :not_found
+    render_error(:not_found, "List not found", "List with id \"#{params[:id]}\" was not found.")
   end
 
   # Only allow a trusted parameter "white list" through.
@@ -61,21 +65,22 @@ class ListsController < ApplicationController
   def find_user
     @user = User.find_by_id!(params[:user_id])
   rescue ActiveRecord::RecordNotFound
-    render json: { errors: "User not found" }, status: :not_found
+    render_error(:not_found, "User not found", "User with id \"#{params[:user_id]}\" was not found.")
   end
 
   def check_if_owner
     if (@list.owner?(@current_user))
       true
     else
-      render json: { errors: "User is not the owner" }, status: :unauthorized
+      render_error(:unauthorized, "User is not the owner", "User with id \"#{params[:user_id]}\" is not the owner of this list.")
     end
   end
+
   def check_user_id_and_current_user
     if (@current_user.id == @user.id)
-        true
+      true
     else
-        render json: { errors: "User's ID and token are different" }, status: :unauthorized
+      render_error(:unauthorized, "Unnauthorized", "Token and ID are from differents users.")
     end
   end
 end
