@@ -129,7 +129,7 @@ class ItemsControllerTest < ActionDispatch::IntegrationTest
         put resolve_url(@item), 
             headers: @auth_header
         assert_response :ok
-        assert_equal "DONE", response.parsed_body["item"]["status"]
+        assert_equal "DONE", response.parsed_body["data"]["attributes"]["status"]
     end
     test "Resolve - Item not found" do
         createUserAndLogin
@@ -160,7 +160,7 @@ class ItemsControllerTest < ActionDispatch::IntegrationTest
         put unsolve_url(@item), 
             headers: @auth_header
         assert_response :ok
-        assert_equal "ACTIVE", response.parsed_body["item"]["status"]
+        assert_equal "ACTIVE", response.parsed_body["data"]["attributes"]["status"]
     end
     test "Unsolve - Item not found" do
         createUserAndLogin

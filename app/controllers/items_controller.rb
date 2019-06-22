@@ -6,7 +6,8 @@ class ItemsController < ApplicationController
 
   # GET /lists/1/items
   def index
-    render json: @list.items
+    render json: serialize_models(@list.items),
+           status: :ok
   end
 
   # POST /lists/1/items
@@ -14,18 +15,20 @@ class ItemsController < ApplicationController
     @item = Item.new(item_params)
     @item.list_id = @list.id
     if @item.save
-      render json: @item, status: :created
+      render json: serialize_model(@item),
+             status: :created
     else
-      render json: @item.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @item.errors)
     end
   end
 
   # PATCH/PUT /items/1
   def update
     if @item.update(item_params)
-      render json: @item
+      render json: serialize_model(@item),
+             status: :ok
     else
-      render json: @item.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @item.errors)
     end
   end
 
@@ -37,18 +40,20 @@ class ItemsController < ApplicationController
   # PATCH/PUT /items/1/resolve
   def resolve
     if @item.update(status: "DONE")
-      render json: {item: @item}
+      render json: serialize_model(@item),
+             status: :ok
     else
-      render json: @item.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @item.errors)
     end
   end
 
   # PATCH/PUT /items/1/resolve
   def unsolve
-    if @item.update(status: "ACTIVE") then
-        render json: {item: @item}, status: :ok
+    if @item.update(status: "ACTIVE")
+      render json: serialize_model(@item),
+             status: :ok
     else
-      render json: @item.errors, status: :unprocessable_entity
+      render_errors(:unprocessable_entity, @item.errors)
     end
   end
 
@@ -58,7 +63,7 @@ class ItemsController < ApplicationController
   def set_item
     @item = Item.find(params[:id] || params[:item_id])
   rescue ActiveRecord::RecordNotFound
-    render json: { errors: "Item not found" }, status: :not_found
+    render_error(:not_found, "Item not found", "Item with id \"#{params[:id] || params[:item_id]}\" was not found.")
   end
 
   # Only allow a trusted parameter "white list" through.
@@ -69,12 +74,12 @@ class ItemsController < ApplicationController
   def set_list
     @list = List.find(params[:list_id])
   rescue ActiveRecord::RecordNotFound
-    render json: { errors: "List not found" }, status: :not_found
+    render_error(:not_found, "List not found", "List with id \"#{params[:list_id]}\" was not found.")
   end
 
   def check_list_owner
-    if (!((@list && @list.owner?(@current_user)) || (@item && @item.list.owner?(@current_user))))then
-      render json: { errors: "User must be the list's owner" }, status: :unauthorized
+    if (!((@list && @list.owner?(@current_user)) || (@item && @item.list.owner?(@current_user))))
+      render_error(:unauthorized, "User is not the owner", "User with id \"#{@current_user.id}\" is not the owner of this list.")
     end
   end
 end
