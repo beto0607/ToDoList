@@ -10,10 +10,15 @@ class ApplicationController < ActionController::API
       @decoded = JsonWebToken.decode(header)
       @current_user = User.find(@decoded[:user_id])
     rescue ActiveRecord::RecordNotFound => e
-      render json: { errors: e.message }, status: :unauthorized
+      render_error(:unauthorized, "Unauthorized", e.message)
     rescue JWT::DecodeError => e
-      render json: { errors: e.message }, status: :unauthorized
+      render_error(:unauthorized, "Unauthorized", e.message)
     end
+  end
+
+  def render_error(status, title, message)
+    errors = [{ "title": title, "detail": message }]
+    render json: JSONAPI::Serializer.serialize_errors(errors), status: status
   end
 
   def serialize_model(model, options = {})

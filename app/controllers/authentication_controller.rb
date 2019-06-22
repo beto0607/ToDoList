@@ -16,9 +16,7 @@ class AuthenticationController < ApplicationController
       render json: serialize_model(obj, include: ["user"]),
              status: :ok
     else
-      errors = [{ "title": "Unauthorized", "detail": "Email or password invalid." }]
-      render json: JSONAPI::Serializer.serialize_errors(errors),
-             status: :unauthorized
+      render_error(:unauthorized, "Unauthorized", "Email or password invalid.")
     end
   end
 end
