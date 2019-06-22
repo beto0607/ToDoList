@@ -18,9 +18,11 @@ class ApplicationController < ActionController::API
 
   def render_error(status, title, message)
     errors = [{ "title": title, "detail": message }]
+    render_errors(status, errors)
+  end
+  def render_errors(status, errors)
     render json: JSONAPI::Serializer.serialize_errors(errors), status: status
   end
-
   def serialize_model(model, options = {})
     options[:is_collection] = false
     JSONAPI::Serializer.serialize(model, options)
