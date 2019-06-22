@@ -47,7 +47,7 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem 'pg'
 gem "factory_bot_rails", "~> 5.0"
-gem "jsonapi-serializers", "~> 1.0"
+gem 'jsonapi-serializers'
 gem 'jwt'
 
 #gem 'webpacker', '~> 4.x'
