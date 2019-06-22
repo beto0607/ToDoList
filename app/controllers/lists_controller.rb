@@ -72,7 +72,7 @@ class ListsController < ApplicationController
     if (@list.owner?(@current_user))
       true
     else
-      render_error(:unauthorized, "User is not the owner", "User with id \"#{params[:user_id]}\" is not the owner of this list.")
+      render_error(:unauthorized, "User is not the owner", "User with id \"#{@current_user.id}\" is not the owner of this list.")
     end
   end
 
